@@ -77,8 +77,14 @@ class HandTracker {
         this.ctx.lineWidth = 3;
         this.ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
         
-        // Draw label
-        const label = handedness.label || 'Hand';
+        // Draw label with corrected mirrored handedness
+        let label = handedness.label || 'Hand';
+        // Fix mirrored labels: front-facing camera shows reversed perspective
+        if (label === 'Left') {
+            label = 'Right';
+        } else if (label === 'Right') {
+            label = 'Left';
+        }
         this.ctx.fillStyle = '#00FF00';
         this.ctx.font = 'bold 16px Arial';
         this.ctx.fillText(label, minX, minY - 5);
