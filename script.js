@@ -27,11 +27,11 @@ class HandTracker {
 
             this.hands.onResults(this.onResults.bind(this));
             
-            this.updateStatus('ready', '✅ Ready! Click "Start Camera" to begin hand tracking');
+            this.updateStatus('ready', 'Ready! Click "Start Camera" to begin hand tracking');
             document.getElementById('startBtn').disabled = false;
         } catch (error) {
             console.error('MediaPipe initialization error:', error);
-            this.updateStatus('error', '❌ Failed to load MediaPipe. Please refresh the page.');
+            this.updateStatus('error', 'Failed to load MediaPipe. Please refresh the page.');
         }
     }
 
@@ -149,7 +149,7 @@ class HandTracker {
 
     async startCamera() {
         try {
-            this.updateStatus('loading', '🔄 Starting camera...');
+            this.updateStatus('loading', 'Starting camera...');
             
             this.camera = new Camera(this.video, {
                 onFrame: async () => {
@@ -164,13 +164,13 @@ class HandTracker {
             await this.camera.start();
             this.isRunning = true;
             
-            this.updateStatus('ready', '✅ Camera active! Show your hands to the camera');
+            this.updateStatus('ready', 'Camera active! Show your hands to the camera');
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             
         } catch (error) {
             console.error('Camera start error:', error);
-            this.updateStatus('error', '❌ Camera access denied. Please allow camera permissions and refresh.');
+            this.updateStatus('error', 'Camera access denied. Please allow camera permissions and refresh.');
         }
     }
 
@@ -184,7 +184,7 @@ class HandTracker {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        this.updateStatus('ready', '✅ Camera stopped. Click "Start Camera" to resume');
+        this.updateStatus('ready', 'Camera stopped. Click "Start Camera" to resume');
         document.getElementById('startBtn').disabled = false;
         document.getElementById('stopBtn').disabled = true;
     }
