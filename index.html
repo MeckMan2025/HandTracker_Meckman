@@ -18,13 +18,18 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 600px;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal {
             background: #FFFFFF;
             color: #000000;
-            border-radius: 2px;
             border: 1px solid #5B5B5B;
-            padding: 40px;
+            padding: 32px;
             text-align: center;
         }
 
@@ -44,10 +49,10 @@
 
         .video-container {
             position: relative;
-            display: inline-block;
+            display: flex;
+            justify-content: center;
             border: 2px solid #5B5B5B;
             overflow: hidden;
-            margin-bottom: 20px;
         }
 
         #video {
@@ -63,7 +68,7 @@
         }
 
         .controls {
-            margin: 30px 0;
+            margin: 24px 0 0 0;
         }
 
         button {
@@ -89,7 +94,7 @@
         }
 
         .status {
-            margin: 20px 0;
+            margin: 16px 0 0 0;
             padding: 16px;
             font-weight: 500;
             border: 1px solid #5B5B5B;
@@ -110,19 +115,6 @@
             color: #FFFFFF;
         }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1px;
-            margin-top: 40px;
-            background: #5B5B5B;
-        }
-
-        .feature {
-            background: #FFFFFF;
-            padding: 24px;
-        }
-
         .feature h3 {
             margin: 0 0 12px 0;
             color: #000000;
@@ -138,8 +130,11 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 24px;
                 margin: 10px;
+            }
+
+            .modal {
+                padding: 24px;
             }
             
             h1 {
@@ -155,40 +150,51 @@
 </head>
 <body>
     <div class="container">
-        <h1>Hand Tracker</h1>
-        <p class="subtitle">Real-time hand detection and skeletal tracking in your browser</p>
-        
-        <div id="status" class="status loading">
-            Loading MediaPipe Hand Detection...
+        <!-- Modal 1: Header and Controls -->
+        <div class="modal">
+            <h1>Hand Tracker</h1>
+            <p class="subtitle">Real-time hand detection and skeletal tracking in your browser</p>
+            
+            <div id="status" class="status loading">
+                Loading MediaPipe Hand Detection...
+            </div>
+
+            <div class="controls">
+                <button id="startBtn" onclick="startCamera()">Start Camera</button>
+                <button id="stopBtn" onclick="stopCamera()" disabled>Stop Camera</button>
+            </div>
         </div>
 
-        <div class="video-container">
-            <video id="video" width="640" height="480" autoplay muted></video>
-            <canvas id="canvas" width="640" height="480"></canvas>
+        <!-- Modal 2: Camera Feed -->
+        <div class="modal">
+            <div class="video-container">
+                <video id="video" width="640" height="480" autoplay muted></video>
+                <canvas id="canvas" width="640" height="480"></canvas>
+            </div>
         </div>
 
-        <div class="controls">
-            <button id="startBtn" onclick="startCamera()">Start Camera</button>
-            <button id="stopBtn" onclick="stopCamera()" disabled>Stop Camera</button>
+        <!-- Modal 3: Hand Detection Feature -->
+        <div class="modal feature">
+            <h3>Hand Detection</h3>
+            <p>Accurately detects up to 2 hands in real-time using Google's MediaPipe</p>
         </div>
 
-        <div class="features">
-            <div class="feature">
-                <h3>Hand Detection</h3>
-                <p>Accurately detects up to 2 hands in real-time using Google's MediaPipe</p>
-            </div>
-            <div class="feature">
-                <h3>Bounding Boxes</h3>
-                <p>Green boxes automatically drawn around detected hands with labels</p>
-            </div>
-            <div class="feature">
-                <h3>Skeletal Tracking</h3>
-                <p>21 hand landmarks showing finger joints and connections</p>
-            </div>
-            <div class="feature">
-                <h3>Browser-Based</h3>
-                <p>Runs entirely in your browser - no installation required</p>
-            </div>
+        <!-- Modal 4: Bounding Boxes Feature -->
+        <div class="modal feature">
+            <h3>Bounding Boxes</h3>
+            <p>Green boxes automatically drawn around detected hands with labels</p>
+        </div>
+
+        <!-- Modal 5: Skeletal Tracking Feature -->
+        <div class="modal feature">
+            <h3>Skeletal Tracking</h3>
+            <p>21 hand landmarks showing finger joints and connections</p>
+        </div>
+
+        <!-- Modal 6: Browser-Based Feature -->
+        <div class="modal feature">
+            <h3>Browser-Based</h3>
+            <p>Runs entirely in your browser - no installation required</p>
         </div>
     </div>
 
