@@ -87,9 +87,15 @@ class HandTracker {
         } else if (label === 'Right') {
             label = 'Left';
         }
+        
+        // Save current context and flip text back to normal orientation
+        this.ctx.save();
+        this.ctx.scale(-1, 1); // Flip text horizontally
         this.ctx.fillStyle = '#00FF00';
         this.ctx.font = 'bold 16px Arial';
-        this.ctx.fillText(label, minX, minY - 5);
+        // Adjust position for flipped coordinates
+        this.ctx.fillText(label, -(minX + (maxX - minX)), minY - 5);
+        this.ctx.restore();
     }
 
     drawHandLandmarks(landmarks) {
