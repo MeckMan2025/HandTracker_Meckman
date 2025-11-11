@@ -49,3 +49,6 @@ tmp/
 
 # Claude Code
 .claude/
+
+# Text files
+*.txt
