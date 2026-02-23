@@ -1,0 +1,21 @@
+MECKMAN HANDTRACKER - SECURITY UPDATE PLAN
+=============================================
+Date: 2026-02-22
+Overall Risk: MEDIUM (no secrets, but CDN supply chain risk with camera access app)
+
+MEDIUM
+------
+[ ] 1. Add SRI integrity hashes to all 4 CDN script tags in index.html (MediaPipe from jsdelivr) — camera app makes supply chain attack especially dangerous
+[ ] 2. Add Content-Security-Policy header to _headers file (missing entirely despite other good headers)
+[ ] 3. Project on iCloud Drive — causing active git corruption (broken branch), move to local directory
+[ ] 4. Cloudflare analytics token exposed — by design, but can be spoofed
+
+LOW
+---
+[ ] 5. Git repository is broken (iCloud sync corruption) — re-clone fresh from GitHub to non-iCloud location
+[ ] 6. script.js cached for 1 year with no cache-busting — users would run vulnerable code after a fix
+[ ] 7. Permissions-Policy grants camera=* (all origins) — change to camera=(self)
+
+INFO
+----
+[ ] 8. Add .env, .dev.vars, *.key, *.pem to .gitignore (preventive, none exist currently)

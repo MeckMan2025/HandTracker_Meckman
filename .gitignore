@@ -52,3 +52,9 @@ tmp/
 
 # Text files
 *.txt
+
+# Environment & secrets
+.env
+.dev.vars
+*.key
+*.pem
