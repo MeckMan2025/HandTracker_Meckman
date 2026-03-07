@@ -215,18 +215,18 @@ window.addEventListener('load', () => {
     handTracker = new HandTracker();
 });
 
-// UI functions
-function startCamera() {
+// UI event listeners
+document.getElementById('startBtn').addEventListener('click', () => {
     if (handTracker) {
         handTracker.startCamera();
     }
-}
+});
 
-function stopCamera() {
+document.getElementById('stopBtn').addEventListener('click', () => {
     if (handTracker) {
         handTracker.stopCamera();
     }
-}
+});
 
 // Handle page visibility changes
 document.addEventListener('visibilitychange', () => {
