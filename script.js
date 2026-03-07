@@ -13,6 +13,15 @@ class HandTracker {
         try {
             this.updateStatus('loading', 'Loading MediaPipe Hand Detection...');
 
+            if (typeof Hands === 'undefined') {
+                this.updateStatus('error', 'MediaPipe failed to load. Check your internet connection and refresh.');
+                return;
+            }
+            if (typeof Camera === 'undefined') {
+                this.updateStatus('error', 'Camera utils failed to load. Check your internet connection and refresh.');
+                return;
+            }
+
             this.hands = new Hands({
                 locateFile: (file) => {
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -33,7 +42,7 @@ class HandTracker {
             document.getElementById('startBtn').disabled = false;
         } catch (error) {
             console.error('MediaPipe initialization error:', error);
-            this.updateStatus('error', 'Failed to load MediaPipe. Please refresh the page.');
+            this.updateStatus('error', 'Error: ' + error.message);
         }
     }
 
@@ -183,7 +192,7 @@ class HandTracker {
 
         } catch (error) {
             console.error('Camera start error:', error);
-            this.updateStatus('error', 'Camera access denied. Please allow camera permissions and refresh.');
+            this.updateStatus('error', 'Camera error: ' + error.message);
         }
     }
 
