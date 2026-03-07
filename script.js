@@ -6,12 +6,13 @@ class HandTracker {
         this.hands = null;
         this.camera = null;
         this.isRunning = false;
-        
-        this.initializeMediaPipe();
+        this.ready = false;
     }
 
     async initializeMediaPipe() {
         try {
+            this.updateStatus('loading', 'Loading MediaPipe Hand Detection...');
+
             this.hands = new Hands({
                 locateFile: (file) => {
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -26,13 +27,12 @@ class HandTracker {
             });
 
             this.hands.onResults(this.onResults.bind(this));
-            
-            // Hide status when ready
-            document.getElementById('status').style.display = 'none';
+
+            this.ready = true;
+            this.updateStatus('ready', 'Ready — click Start Camera');
             document.getElementById('startBtn').disabled = false;
         } catch (error) {
             console.error('MediaPipe initialization error:', error);
-            document.getElementById('status').style.display = 'block';
             this.updateStatus('error', 'Failed to load MediaPipe. Please refresh the page.');
         }
     }
@@ -40,23 +40,23 @@ class HandTracker {
     onResults(results) {
         this.ctx.save();
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         // Draw the video frame
         this.ctx.drawImage(results.image, 0, 0, this.canvas.width, this.canvas.height);
-        
+
         if (results.multiHandLandmarks) {
             for (let i = 0; i < results.multiHandLandmarks.length; i++) {
                 const landmarks = results.multiHandLandmarks[i];
                 const handedness = results.multiHandedness[i];
-                
+
                 // Draw bounding box and label
                 this.drawBoundingBox(landmarks, handedness);
-                
+
                 // Draw hand landmarks and connections
                 this.drawHandLandmarks(landmarks);
             }
         }
-        
+
         this.ctx.restore();
     }
 
@@ -65,20 +65,20 @@ class HandTracker {
             landmark.x * this.canvas.width,
             landmark.y * this.canvas.height
         ]);
-        
+
         const xs = points.map(p => p[0]);
         const ys = points.map(p => p[1]);
-        
+
         const minX = Math.min(...xs) - 20;
         const maxX = Math.max(...xs) + 20;
         const minY = Math.min(...ys) - 20;
         const maxY = Math.max(...ys) + 20;
-        
+
         // Draw green bounding box
         this.ctx.strokeStyle = '#00FF00';
         this.ctx.lineWidth = 3;
         this.ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
-        
+
         // Draw label with corrected mirrored handedness
         let label = handedness.label || 'Hand';
         // Fix mirrored labels: front-facing camera shows reversed perspective
@@ -87,7 +87,7 @@ class HandTracker {
         } else if (label === 'Right') {
             label = 'Left';
         }
-        
+
         // Save current context and flip text back to normal orientation
         this.ctx.save();
         this.ctx.scale(-1, 1); // Flip text horizontally
@@ -112,11 +112,11 @@ class HandTracker {
         // Draw connections (skeleton lines)
         this.ctx.strokeStyle = '#FF6B6B';
         this.ctx.lineWidth = 2;
-        
+
         connections.forEach(connection => {
             const start = landmarks[connection[0]];
             const end = landmarks[connection[1]];
-            
+
             this.ctx.beginPath();
             this.ctx.moveTo(start.x * this.canvas.width, start.y * this.canvas.height);
             this.ctx.lineTo(end.x * this.canvas.width, end.y * this.canvas.height);
@@ -127,10 +127,10 @@ class HandTracker {
         landmarks.forEach((landmark, index) => {
             const x = landmark.x * this.canvas.width;
             const y = landmark.y * this.canvas.height;
-            
+
             this.ctx.beginPath();
             this.ctx.arc(x, y, 4, 0, 2 * Math.PI);
-            
+
             // Different colors for different finger parts
             if (index === 0) {
                 this.ctx.fillStyle = '#FF0000'; // Wrist - red
@@ -145,9 +145,9 @@ class HandTracker {
             } else {
                 this.ctx.fillStyle = '#8B00FF'; // Pinky - purple
             }
-            
+
             this.ctx.fill();
-            
+
             // Add white border to landmarks
             this.ctx.strokeStyle = '#FFFFFF';
             this.ctx.lineWidth = 1;
@@ -156,9 +156,14 @@ class HandTracker {
     }
 
     async startCamera() {
+        if (!this.ready) {
+            this.updateStatus('loading', 'Still loading MediaPipe, please wait...');
+            return;
+        }
+
         try {
             this.updateStatus('loading', 'Starting camera...');
-            
+
             this.camera = new Camera(this.video, {
                 onFrame: async () => {
                     if (this.hands && this.isRunning) {
@@ -168,69 +173,59 @@ class HandTracker {
                 width: 640,
                 height: 480
             });
-            
+
             await this.camera.start();
             this.isRunning = true;
-            
-            // Hide status when camera is active
+
             document.getElementById('status').style.display = 'none';
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
-            
+
         } catch (error) {
             console.error('Camera start error:', error);
-            document.getElementById('status').style.display = 'block';
             this.updateStatus('error', 'Camera access denied. Please allow camera permissions and refresh.');
         }
     }
 
     stopCamera() {
         this.isRunning = false;
-        
+
         if (this.camera) {
             this.camera.stop();
         }
-        
+
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Hide status when stopped
-        document.getElementById('status').style.display = 'none';
+
+        this.updateStatus('ready', 'Ready — click Start Camera');
         document.getElementById('startBtn').disabled = false;
         document.getElementById('stopBtn').disabled = true;
     }
 
     updateStatus(type, message) {
         const statusEl = document.getElementById('status');
+        statusEl.style.display = 'block';
         statusEl.className = `status ${type}`;
         statusEl.textContent = message;
     }
 }
 
-// Global variables for UI functions
-let handTracker;
-
-// Initialize when page loads
+// Initialize everything after all resources are loaded
 window.addEventListener('load', () => {
-    handTracker = new HandTracker();
-});
+    const handTracker = new HandTracker();
+    handTracker.initializeMediaPipe();
 
-// UI event listeners
-document.getElementById('startBtn').addEventListener('click', () => {
-    if (handTracker) {
+    document.getElementById('startBtn').addEventListener('click', () => {
         handTracker.startCamera();
-    }
-});
+    });
 
-document.getElementById('stopBtn').addEventListener('click', () => {
-    if (handTracker) {
+    document.getElementById('stopBtn').addEventListener('click', () => {
         handTracker.stopCamera();
-    }
-});
+    });
 
-// Handle page visibility changes
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden && handTracker && handTracker.isRunning) {
-        handTracker.stopCamera();
-    }
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && handTracker.isRunning) {
+            handTracker.stopCamera();
+        }
+    });
 });
